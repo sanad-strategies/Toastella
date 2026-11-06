@@ -24,7 +24,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--butter);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;font-size:1.08rem;line-height:1.55;-webkit-font-smoothing:antialiased}
-img,video{display:block;max-width:100%}
+img,video,canvas{display:block;max-width:100%}
 a{color:inherit}
 h1,h2,h3,h4{font-family:'Bagel Fat One','Arial Rounded MT Bold',system-ui,sans-serif;font-weight:400;line-height:1.05}
 :focus-visible{outline:3px solid var(--ink);outline-offset:3px;box-shadow:0 0 0 6px #fff}
@@ -40,7 +40,7 @@ h1,h2,h3,h4{font-family:'Bagel Fat One','Arial Rounded MT Bold',system-ui,sans-s
 /* Hero: the film plays as you scroll */
 .hero{position:relative;height:420vh;background:#f6e0a8}
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#f6e0a8}
-.stage video,.stage .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stage canvas,.stage .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .brand{position:absolute;left:var(--pad);top:1rem;width:clamp(54px,7vw,84px);z-index:3}
 .brand img{width:100%;height:auto;border-radius:50%;box-shadow:3px 3px 0 var(--ink)}
 .hero h1{position:absolute;left:0;right:0;top:clamp(4.2rem,11vh,7.5rem);text-align:center;font-size:clamp(2.5rem,7.4vw,6rem);z-index:2;color:var(--ink);text-shadow:3px 3px 0 rgba(255,255,255,.75);padding:0 var(--pad);opacity:var(--fade,1);pointer-events:none}
@@ -88,7 +88,7 @@ footer a{text-underline-offset:3px}
 @media (max-width:760px){
   .hero{height:380vh}
   .stage{display:flex;flex-direction:column;justify-content:center;background:linear-gradient(#f6e0a8 0 58%,#d9a766 58%)}
-  .stage video,.stage .still{position:relative;inset:auto;width:100%;height:auto;aspect-ratio:5/6;margin-top:3.6rem}
+  .stage canvas,.stage .still{position:relative;inset:auto;width:100%;height:auto;aspect-ratio:5/6;margin-top:3.6rem}
   .hero h1{top:5.2rem;font-size:clamp(2.1rem,10.5vw,3rem)}
   .grid{grid-template-columns:1fr;max-width:430px}
   .story .inner{grid-template-columns:1fr}
@@ -105,7 +105,7 @@ footer a{text-underline-offset:3px}
 
 <section class="hero" id="hero" aria-label="Toastella intro">
   <div class="stage">
-    <video id="v" muted playsinline preload="auto" poster="toastella-poster.jpg" aria-label="Our toast mascot strolls along the seaside, pulls funny faces and gives the OK sign"></video>
+    <canvas id="v" role="img" aria-label="Our toast mascot strolls along the seaside, pulls funny faces and gives the OK sign"></canvas>
     <a class="brand" href="#hero" aria-label="Toastella"><img src="toastella-logo.png" alt="Toastella logo" width="560" height="560"></a>
     <h1>It's snack o'clock.</h1>
     <div class="hint"><span>Scroll to play</span></div>
@@ -186,8 +186,17 @@ footer a{text-underline-offset:3px}
     return;
   }
 
-  v.src=mobile?'toastella-hero-mobile.mp4':'toastella-hero.mp4';
-  var dur=0,target=0,cur=0,primed=false;
+  var N=339,dir=mobile?'frames/m/':'frames/d/';
+  var frames=new Array(N),ctx=v.getContext('2d'),sized=false,last=-1,target=0,cur=0;
+  function load(i){
+    var im=new Image();im.decoding='async';
+    im.onload=function(){frames[i]=im;if(!sized){v.width=im.naturalWidth;v.height=im.naturalHeight;sized=true;}last=-1;};
+    im.src=dir+('000'+(i+1)).slice(-4)+'.webp';
+  }
+  // first frame, then the end, then the rest in a spread-out order so scrubbing works while loading
+  load(0);load(N-1);
+  var order=[];for(var step=32;step>=1;step=step>>1){for(var i=0;i<N;i+=step){if(order.indexOf(i)<0)order.push(i);}}
+  order.forEach(function(i){if(i!==0&&i!==N-1)load(i);});
 
   function progress(){
     var total=hero.offsetHeight-window.innerHeight;
@@ -199,22 +208,19 @@ footer a{text-underline-offset:3px}
     stage.style.setProperty('--fade',String(Math.max(0,1-target/0.1)));
     cta.classList.toggle('on',target>0.93);
   }
-  function prime(){
-    if(primed)return;primed=true;
-    var pr=v.play();
-    if(pr&&pr.then){pr.then(function(){v.pause();}).catch(function(){});}
+  function draw(idx){
+    // nearest loaded frame
+    for(var d=0;d<N;d++){
+      var f=frames[idx-d]||frames[idx+d];
+      if(f){if(f!==frames[last]||last!==idx){ctx.drawImage(f,0,0);last=idx;}return;}
+    }
   }
   function tick(){
-    cur+=(target-cur)*0.2;
-    if(dur){
-      var t=cur*dur;
-      if(Math.abs(v.currentTime-t)>0.015){try{v.currentTime=t;}catch(e){}}
-    }
+    cur+=(target-cur)*0.25;
+    if(sized){var idx=Math.round(cur*(N-1));if(idx!==last)draw(idx);}
     requestAnimationFrame(tick);
   }
-  v.addEventListener('loadedmetadata',function(){dur=v.duration||0;onScroll();});
   window.addEventListener('scroll',onScroll,{passive:true});
-  window.addEventListener('touchstart',prime,{once:true,passive:true});
   window.addEventListener('resize',onScroll);
   onScroll();tick();
 })();
