@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toastella</title>
+<meta name="description" content="It's snack o'clock. Grilled toast sandwiches stacked with chicken or beef, served with fries.">
+<meta name="theme-color" content="#f6e0a8">
+<link rel="icon" type="image/png" href="toastella-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* Palette taken from the logo and the hero film: sun yellow, toast gold, sneaker red, sea teal, outline brown */
+:root{
+  --sun:#ffd54a;
+  --butter:#fff1c9;
+  --toast:#e6a04e;
+  --red:#d6262d;
+  --sea:#35b3ad;
+  --ink:#3a2216;
+  --pad:clamp(1.1rem,4vw,3rem);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--butter);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;font-size:1.08rem;line-height:1.55;-webkit-font-smoothing:antialiased}
+img,video{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3,h4{font-family:'Bagel Fat One','Arial Rounded MT Bold',system-ui,sans-serif;font-weight:400;line-height:1.05}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;box-shadow:0 0 0 6px #fff}
+
+.btn{display:inline-block;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:999px;padding:.8rem 1.6rem;font:800 1.05rem 'Nunito',sans-serif;text-decoration:none;box-shadow:5px 5px 0 var(--ink);transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink)}
+.btn.sun{background:var(--sun);color:var(--ink);box-shadow:5px 5px 0 var(--red)}
+.btn.sun:hover{box-shadow:2px 2px 0 var(--red)}
+
+.wave{display:block;width:100%;height:clamp(28px,5vw,60px);margin-bottom:-1px}
+.wave.top{position:relative;z-index:2;margin-top:calc(-1 * clamp(28px,5vw,60px))}
+
+/* Hero: the film plays as you scroll */
+.hero{position:relative;height:420vh;background:#f6e0a8}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#f6e0a8}
+.stage video,.stage .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.brand{position:absolute;left:var(--pad);top:1rem;width:clamp(54px,7vw,84px);z-index:3}
+.brand img{width:100%;height:auto;border-radius:50%;box-shadow:3px 3px 0 var(--ink)}
+.hero h1{position:absolute;left:0;right:0;top:clamp(4.2rem,11vh,7.5rem);text-align:center;font-size:clamp(2.5rem,7.4vw,6rem);z-index:2;color:var(--ink);text-shadow:3px 3px 0 rgba(255,255,255,.75);padding:0 var(--pad);opacity:var(--fade,1);pointer-events:none}
+.hint{position:absolute;left:0;right:0;bottom:1.4rem;text-align:center;font-weight:800;z-index:2;opacity:var(--fade,1);pointer-events:none}
+.hint span{display:inline-block;background:var(--butter);border:3px solid var(--ink);border-radius:999px;padding:.25rem 1rem;box-shadow:3px 3px 0 var(--ink)}
+.cta{position:absolute;left:0;right:0;bottom:1.8rem;text-align:center;z-index:3;opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .35s,transform .35s}
+.cta.on{opacity:1;transform:none;pointer-events:auto}
+
+/* Menu */
+.menu{background:var(--butter);padding:0 var(--pad) clamp(3rem,7vw,5.5rem)}
+.menu .inner{max-width:1180px;margin:0 auto}
+.menu h2{font-size:clamp(2.2rem,5.4vw,3.8rem);margin-bottom:.6rem}
+.menu .lead{max-width:34em;margin-bottom:2.4rem}
+.menu h3{font-size:clamp(1.6rem,3.4vw,2.2rem);margin:0 0 1.2rem;display:inline-block;background:var(--sun);border:3px solid var(--ink);border-radius:999px;padding:.25rem 1.2rem;box-shadow:4px 4px 0 var(--ink);transform:rotate(-1.5deg)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.2rem,3vw,2rem);margin-bottom:3.2rem}
+.card{background:#fff;border:3px solid var(--ink);border-radius:22px;overflow:hidden;box-shadow:7px 7px 0 var(--ink);display:flex;flex-direction:column}
+.card img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;background:var(--sun);border-bottom:3px solid var(--ink)}
+.card .b{padding:1rem 1.2rem 1.3rem}
+.card h4{font-size:1.7rem;margin-bottom:.4rem}
+.card p{font-size:1rem}
+
+/* Mascot */
+.mascot{background:var(--sea);padding:clamp(2.6rem,7vw,5rem) var(--pad) clamp(3rem,7vw,5.5rem)}
+.mascot .inner{max-width:1100px;margin:0 auto;text-align:center}
+.mascot h2{font-size:clamp(2rem,5vw,3.4rem);margin-bottom:.5rem;color:#fff;text-shadow:3px 3px 0 var(--ink)}
+.mascot p{max-width:28em;margin:0 auto 2.2rem;color:var(--ink);font-weight:700}
+.pics{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,3vw,2rem)}
+.pics img{width:100%;height:auto;aspect-ratio:1;object-fit:cover;border:3px solid var(--ink);border-radius:50%;box-shadow:6px 6px 0 var(--ink);background:#f6e0a8}
+.pics img:nth-child(2){transform:translateY(1.2rem)}
+
+/* Story */
+.story{background:var(--sun);padding:clamp(2.6rem,7vw,5rem) var(--pad) clamp(3rem,7vw,5.5rem)}
+.story .inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(1.5rem,6vw,4.5rem);align-items:center}
+.story img{width:100%;max-width:440px;height:auto;aspect-ratio:4/5;object-fit:cover;border:3px solid var(--ink);border-radius:22px;box-shadow:8px 8px 0 var(--ink);justify-self:center;transform:rotate(-2deg)}
+.story h2{font-size:clamp(2.2rem,5vw,3.6rem);margin-bottom:1rem}
+.story p{font-size:clamp(1.1rem,2.2vw,1.35rem);line-height:1.6;max-width:28em;font-weight:700}
+
+/* Contact */
+.contact{background:var(--ink);color:var(--butter);padding:clamp(3rem,8vw,6rem) var(--pad);text-align:center}
+.contact h2{font-size:clamp(2.2rem,5.4vw,3.8rem);margin-bottom:.8rem;color:var(--sun)}
+.contact p{max-width:26em;margin:0 auto 2rem}
+footer{background:var(--ink);color:var(--butter);text-align:center;padding:0 var(--pad) 2rem;font-size:.95rem}
+footer a{text-underline-offset:3px}
+
+@media (max-width:760px){
+  .hero{height:380vh}
+  .stage{display:flex;flex-direction:column;justify-content:center;background:linear-gradient(#f6e0a8 0 58%,#d9a766 58%)}
+  .stage video,.stage .still{position:relative;inset:auto;width:100%;height:auto;aspect-ratio:5/6;margin-top:3.6rem}
+  .hero h1{top:5.2rem;font-size:clamp(2.1rem,10.5vw,3rem)}
+  .grid{grid-template-columns:1fr;max-width:430px}
+  .story .inner{grid-template-columns:1fr}
+  .pics{grid-template-columns:repeat(3,1fr);gap:.7rem}
+  .pics img{box-shadow:4px 4px 0 var(--ink)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .btn,.cta{transition:none}
+}
+</style>
+</head>
+<body>
+
+<section class="hero" id="hero" aria-label="Toastella intro">
+  <div class="stage">
+    <video id="v" muted playsinline preload="auto" poster="toastella-poster.jpg" aria-label="Our toast mascot strolls along the seaside, pulls funny faces and gives the OK sign"></video>
+    <a class="brand" href="#hero" aria-label="Toastella"><img src="toastella-logo.png" alt="Toastella logo" width="560" height="560"></a>
+    <h1>It's snack o'clock.</h1>
+    <div class="hint"><span>Scroll to play</span></div>
+    <div class="cta" id="cta"><a class="btn" href="#menu">See what we make</a></div>
+  </div>
+</section>
+
+<main>
+  <svg class="wave top" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 C120 0 240 0 360 30 S600 60 720 30 S960 0 1080 30 S1320 60 1440 30 V60 H0Z" fill="#fff1c9"/></svg>
+  <section class="menu" id="menu">
+    <div class="inner">
+      <h2>What we make</h2>
+      <p class="lead">Toast sandwiches, grilled golden and stacked high. Pick chicken or beef, and every one comes with fries.</p>
+
+      <h3>Chicken</h3>
+      <div class="grid">
+        <article class="card"><img src="toastella-the-classic.jpg" alt="The Classic: a grilled toast sandwich cut in half next to a cup of fries" loading="lazy" width="1000" height="1250"><div class="b"><h4>The Classic</h4><p>A scrumptious grilled sandwich with 3 fillings, served with our fries.</p></div></article>
+        <article class="card"><img src="toastella-the-big-one.jpg" alt="The Big One: a large grilled sandwich with tomato, pickles and special sauce" loading="lazy" width="1000" height="1250"><div class="b"><h4>The Big One</h4><p>One large sandwich with 5 fillings and our special sauce, served with our signature fries.</p></div></article>
+        <article class="card"><img src="toastella-the-monster.jpg" alt="The Monster: a tall three-layer toast sandwich with a fried egg and jalapeños" loading="lazy" width="1000" height="1250"><div class="b"><h4>The Monster</h4><p>One monstrous sandwich with three layers of toast and 8 fillings of our specials, served with our large fries.</p></div></article>
+      </div>
+
+      <h3>Beef</h3>
+      <div class="grid">
+        <article class="card"><img src="toastella-the-boss.jpg" alt="The Boss: a beef patty with melted cheese in grilled toast, with a cup of fries" loading="lazy" width="1000" height="1250"><div class="b"><h4>The Boss</h4><p>A juicy beef patty with melted cheese, lettuce, tomato and pickles in grilled toast, finished with our special sauce and served with fries.</p></div></article>
+        <article class="card"><img src="toastella-the-heavyweight.jpg" alt="The Heavyweight: a grilled sandwich with two beef patties and melted cheese" loading="lazy" width="1000" height="1250"><div class="b"><h4>The Heavyweight</h4><p>Two beef patties stacked with melted cheese, lettuce, tomato and pickles in grilled toast, finished with our special sauce and served with fries.</p></div></article>
+        <article class="card"><img src="toastella-the-titan.jpg" alt="The Titan: a towering beef sandwich with a fried egg, jalapeños and crispy onions" loading="lazy" width="1000" height="1250"><div class="b"><h4>The Titan</h4><p>A towering sandwich of three layers of toast with a beef patty, melted cheese, lettuce, tomato, pickles, crispy fried onions, a fried egg and jalapeños, served with a large portion of fries.</p></div></article>
+      </div>
+    </div>
+  </section>
+
+  <svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" style="background:#fff1c9"><path d="M0 30 C120 0 240 0 360 30 S600 60 720 30 S960 0 1080 30 S1320 60 1440 30 V60 H0Z" fill="#35b3ad"/></svg>
+  <section class="mascot">
+    <div class="inner">
+      <h2>Meet our little toast</h2>
+      <p>He never says no to a snack.</p>
+      <div class="pics">
+        <img src="toastella-mascot-tongue.jpg" alt="The Toastella mascot sticking out his tongue with puffed cheeks" loading="lazy" width="520" height="520">
+        <img src="toastella-mascot-shock.jpg" alt="The Toastella mascot looking shocked" loading="lazy" width="520" height="520">
+        <img src="toastella-mascot-ok.jpg" alt="The Toastella mascot winking and giving the OK sign" loading="lazy" width="520" height="520">
+      </div>
+    </div>
+  </section>
+
+  <svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" style="background:#35b3ad"><path d="M0 30 C120 0 240 0 360 30 S600 60 720 30 S960 0 1080 30 S1320 60 1440 30 V60 H0Z" fill="#ffd54a"/></svg>
+  <section class="story">
+    <div class="inner">
+      <img src="toastella-lifestyle.jpg" alt="Someone about to bite into a grilled toast sandwich by the sea, with a tray of fries" loading="lazy" width="1000" height="1250">
+      <div>
+        <h2>Toast, stacked high</h2>
+        <p>Toastella is all about toast sandwiches, grilled until golden and stacked with fillings you'll want to keep adding. Chicken or beef, small or monster, every one comes with fries, because it's always snack o'clock.</p>
+      </div>
+    </div>
+  </section>
+
+  <svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" style="background:#ffd54a"><path d="M0 30 C120 0 240 0 360 30 S600 60 720 30 S960 0 1080 30 S1320 60 1440 30 V60 H0Z" fill="#3a2216"/></svg>
+  <section class="contact" id="contact">
+    <h2>Hungry? Say hello.</h2>
+    <p>Message us on WhatsApp to order or ask about the menu.</p>
+    <a class="btn sun" href="https://wa.me/201555689445?text=Hi%20Toastella%2C%20I%27d%20like%20to%20order." target="_blank" rel="noopener">Message us on WhatsApp</a>
+  </section>
+</main>
+
+<footer>Toastella, est. 2024. Website by <a href="https://sanad-strategies.github.io/projects/">Sanad Strategies</a></footer>
+
+<script>
+(function(){
+  var hero=document.getElementById('hero'),v=document.getElementById('v'),cta=document.getElementById('cta');
+  var stage=hero.querySelector('.stage');
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mobile=window.matchMedia('(max-width:760px)').matches;
+
+  if(reduce){
+    // No scroll film: show the final pose and the button straight away
+    hero.style.height='auto';
+    var img=document.createElement('img');img.className='still';img.src='toastella-poster-end.jpg';img.alt='Our toast mascot winking and giving the OK sign on the seaside boardwalk';
+    v.replaceWith(img);cta.classList.add('on');
+    hero.querySelector('.hint').style.display='none';
+    return;
+  }
+
+  v.src=mobile?'toastella-hero-mobile.mp4':'toastella-hero.mp4';
+  var dur=0,target=0,cur=0,primed=false;
+
+  function progress(){
+    var total=hero.offsetHeight-window.innerHeight;
+    var p=-hero.getBoundingClientRect().top/total;
+    return Math.min(1,Math.max(0,p));
+  }
+  function onScroll(){
+    target=progress();
+    stage.style.setProperty('--fade',String(Math.max(0,1-target/0.1)));
+    cta.classList.toggle('on',target>0.93);
+  }
+  function prime(){
+    if(primed)return;primed=true;
+    var pr=v.play();
+    if(pr&&pr.then){pr.then(function(){v.pause();}).catch(function(){});}
+  }
+  function tick(){
+    cur+=(target-cur)*0.2;
+    if(dur){
+      var t=cur*dur;
+      if(Math.abs(v.currentTime-t)>0.015){try{v.currentTime=t;}catch(e){}}
+    }
+    requestAnimationFrame(tick);
+  }
+  v.addEventListener('loadedmetadata',function(){dur=v.duration||0;onScroll();});
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('touchstart',prime,{once:true,passive:true});
+  window.addEventListener('resize',onScroll);
+  onScroll();tick();
+})();
+</script>
+</body>
+</html>
